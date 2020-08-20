@@ -5,8 +5,7 @@ from bson.objectid import ObjectId
 
 app = Flask(__name__)
 app.config["MONGO_DBNAME"] = 'task_manager'
-app.config["MONGO_URI"] = 'mongodb://root:r00tUser@myfirstcluster-shard-00-00.w52aw.mongodb.net:27017,myfirstcluster-shard-00-01.w52aw.mongodb.net:27017,myfirstcluster-shard-00-02.w52aw.mongodb.net:27017/task_managerheroku?ssl=true&replicaSet=atlas-n79620-shard-0&authSource=admin&retryWrites=true&w=majority'
-
+app.config["MONGO_URI"] = 'mongodb://root:r00tUser@myfirstcluster-shard-00-00.w52aw.mongodb.net:27017,myfirstcluster-shard-00-01.w52aw.mongodb.net:27017,myfirstcluster-shard-00-02.w52aw.mongodb.net:27017/task_manager?ssl=true&replicaSet=atlas-n79620-shard-0&authSource=admin&retryWrites=true&w=majority'
 mongo = PyMongo(app)
 
 
@@ -17,10 +16,17 @@ def get_tasks():
 
 @app.route('/add_task')
 def add_task():
-    return render_template('addtask.html')
+    return render_template('addtask.html',
+        categories=mongo.db.categories.find())
 
 
 
+@app.route('/insert_task', methods=['POST'])
+def insert_task():
+    tasks = mongo.db.tasks
+    tasks.insert_one(request.form.to_dict())
+    return redirect(url_for('get_tasks'))
+    
 
 if __name__ == '__main__':
     app.run(host=os.environ.get('IP'),
